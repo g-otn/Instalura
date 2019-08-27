@@ -12,6 +12,11 @@ function autenticado() {
   return localStorage.getItem('auth-token')
 }
 
+function logout() {
+  localStorage.removeItem('auth-token')
+  return (<Redirect to="/" />)
+}
+
 ReactDOM.render(
   (
     <BrowserRouter>
@@ -24,6 +29,7 @@ ReactDOM.render(
                 (<App />) :
                 (<Redirect to="/?msg=Você precisa estar autenticado para acessar o endereço" />)
             } />
+            <Route path='/logout' render={logout} />
             <Route component={Login}></Route>
           </Switch>
         </div>

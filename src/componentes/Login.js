@@ -65,11 +65,6 @@ export default class Login extends Component {
           <input type="password" ref={input => this.senha = input} />
           <input type="submit" value="login" />
         </form>
-        <pre>
-          Contas: alots, vitor ou rafael
-          <br />
-          Senha: 123456
-        </pre>
       </div>
     )
   }
