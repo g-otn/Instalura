@@ -1,11 +1,15 @@
 import React, { Component } from 'react'
+import qs from 'qs'
 import '../css/login.css'
 
 export default class Login extends Component {
 
-  constructor() {
-    super()
-    this.state = { msg: '' }
+  constructor(props) {
+    super(props)
+    let parametros = qs.parse(props.location.search, {
+      ignoreQueryPrefix: true // https://stackoverflow.com/a/50017091
+    })
+    this.state = { msg: parametros.msg } // this.props.location.query.msg (https://stackoverflow.com/a/43220620)
   }
 
   enviar(event) {
