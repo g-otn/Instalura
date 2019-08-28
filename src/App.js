@@ -5,12 +5,12 @@ import './css/reset.css'
 import './css/reset.css'
 
 class App extends Component {
-
+  
   render() {
     return (
       <div>
         <Header />
-        <Timeline />
+        <Timeline paginaUsuario={this.props.paginaUsuario} />
       </div>
     )
   }

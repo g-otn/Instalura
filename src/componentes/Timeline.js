@@ -4,27 +4,29 @@ import '../css/timeline.css'
 
 export default class Timeline extends Component {
 
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {
       fotos: []
     }
   }
 
   componentDidMount() {
-    fetch(`https://instalura-api.herokuapp.com/api/fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`) // alots, rafael ou vitor
+    let uri = 'https://instalura-api.herokuapp.com/api/'
+    uri += this.props.paginaUsuario ? 'public/fotos/' + this.props.paginaUsuario : `fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
+    
+    fetch(uri)
       .then(response => response.json())
       .then(fotos => {
-        this.setState({ fotos: fotos })
+        
+        this.setState({ fotos: fotos.error ? [] : fotos })
       })
   }
 
   render() {
     return (
       <div className="fotos container">
-        {
-          this.state.fotos.map(foto => <FotoItem key={foto.id} foto={foto} />)
-        }
+        {this.state.fotos.map(foto => <FotoItem key={foto.id} foto={foto} />)}
       </div>
     )
   }
