@@ -6,6 +6,7 @@ export default class Timeline extends Component {
 
   constructor(props) {
     super(props)
+    console.log(props, this.props)
     this.state = {
       fotos: []
     }
@@ -13,7 +14,10 @@ export default class Timeline extends Component {
 
   componentDidMount() {
     let uri = 'https://instalura-api.herokuapp.com/api/'
-    uri += this.props.paginaUsuario ? 'public/fotos/' + this.props.paginaUsuario : `fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
+    if (this.props.paginaUsuario) // timeline do usuário logado ou pública?
+      uri += 'public/fotos/' + this.props.paginaUsuario
+    else
+      uri += `fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
     
     fetch(uri)
       .then(response => response.json())

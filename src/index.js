@@ -15,7 +15,7 @@ function autenticado() {
 }
 
 function acessarTimeline(nextState) {
-  let paginaUsuario = nextState.match.params.paginaUsuario
+  let paginaUsuario = nextState.match.params.paginaUsuario // substitui PatternUtils.matchPattern(...).params[...]
   if (!autenticado() && !paginaUsuario)
     return (<Redirect to="/?msg=Você precisa estar autenticado para acessar o endereço" />)
   else
