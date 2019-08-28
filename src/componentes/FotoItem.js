@@ -47,7 +47,7 @@ class FotoInfo extends Component {
               )
             })
           }
-          {this.props.foto.comentarios.length == 0 ? 'Nenhum comentário' : ''}
+          {this.props.foto.comentarios.length === 0 ? 'Nenhum comentário' : ''}
         </ul>
       </div>
     )
