@@ -5,6 +5,7 @@
   transform: translate(-50%,-50%);
   background: white;
   padding: 1em;
+  box-shadow: 3px 3px 10px grey;
 }
 
 .login-box input {
