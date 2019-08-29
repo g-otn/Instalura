@@ -3,10 +3,45 @@ import { Link } from 'react-router-dom'
 
 class FotoAtualizacoes extends Component {
 
+  constructor(props) {
+    super(props)
+    this.state = {
+      likeada: this.props.foto.likeada
+    }
+  }
+
+  curtir(e) {
+    e.preventDefault()
+
+    fetch(`https://instalura-api.herokuapp.com/api/fotos/${this.props.foto.id}/like`,
+      {
+        method: 'POST',
+        headers: { // X-AUTH-TOKEN pode ser por parâmetro de URL ou de cabeçalho
+          'X-AUTH-TOKEN': localStorage.getItem('auth-token')
+        }
+      }
+    )
+      .then(response => {
+        if (response.ok)
+          return response.json()
+        else
+          throw new Error('Não foi possível curtir a foto (' + response.status + ')')
+      })
+      .then(like => {
+        this.setState({
+          likeada: !this.state.likeada
+          // like.login
+        })
+      })
+      .catch(erro => {
+        console.error(erro.message)
+      })
+  }
+
   render() {
     return (
       <section className="fotoAtualizacoes">
-        <a href="#" className="fotoAtualizacoes-like">Likar</a>
+        <a onClick={this.curtir.bind(this)} className={'fotoAtualizacoes-like' + (this.state.likeada ? '-ativo' : '')}>Likar</a>
         <form className="fotoAtualizacoes-form">
           <input type="text" placeholder="Adicione um comentário..." className="fotoAtualizacoes-form-campo" />
           <input type="submit" value="Comentar!" className="fotoAtualizacoes-form-submit" />
@@ -25,11 +60,20 @@ class FotoInfo extends Component {
       <div className="foto-info">
         <div className="foto-info-likes">
           {
-            this.props.foto.likers.map(liker => {
-              return (<Link to={liker.login}>{liker.login}, </Link>)
+            this.props.foto.likers.map((liker, index) => {
+              return (
+                <span>
+                  <Link to={'/timeline/' + liker.login}>
+                    {liker.login}
+                  </Link>
+                  {index < this.props.foto.likers.length - 1 ? ', ' : ' '}
+                </span>
+              )
             })
           }
-          {this.props.foto.likers.length > 0 ? 'curtiram' : 'Nenhuma curtida'}
+          {this.props.foto.likers.length > 0 ?
+            (this.props.foto.likers.length == 1 ? 'curtiu' : 'curtiram') :
+            'Nenhuma likeada'}
         </div>
 
         <p className="foto-info-legenda">
@@ -82,7 +126,7 @@ export default class FotoItem extends Component {
         <FotoHeader foto={this.props.foto} />
         <img alt="foto" className="foto-src" src={this.props.foto.urlFoto} />
         <FotoInfo foto={this.props.foto} />
-        <FotoAtualizacoes />
+        <FotoAtualizacoes foto={this.props.foto} />
       </div>
     )
   }
