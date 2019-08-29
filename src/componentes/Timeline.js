@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import PubSub from 'pubsub-js'
 import FotoItem from './FotoItem'
 import '../css/timeline.css'
 
@@ -10,6 +11,12 @@ export default class Timeline extends Component {
       login: '',
       fotos: []
     }
+
+    PubSub.subscribe('timeline', (topico, fotos) => {
+      console.log(fotos)
+      this.setState({ fotos })
+      window.scrollTo(0, 0);
+    })
   }
 
   carregarFotos() {
@@ -30,7 +37,7 @@ export default class Timeline extends Component {
   componentDidMount() {
     this.carregarFotos()
   }
-  
+
   // Atualiza a página quando um link para outra timeline for clicado
   // ---------- 
   // Referências
