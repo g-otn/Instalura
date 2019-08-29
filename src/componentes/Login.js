@@ -42,7 +42,6 @@ export default class Login extends Component {
       })
       .then(token => {
         // Armazena o JSON Web Token
-        console.log('token:', token)
         localStorage.setItem('auth-token', token)
 
         // Redireciona para /timeline se o login foi realizado com sucesso

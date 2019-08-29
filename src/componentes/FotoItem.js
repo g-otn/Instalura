@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import PubSub from 'pubsub-js'
 
 class FotoAtualizacoes extends Component {
 
@@ -30,8 +31,13 @@ class FotoAtualizacoes extends Component {
       .then(like => {
         this.setState({
           likeada: !this.state.likeada
-          // like.login
         })
+        PubSub.publish('atualiza-liker',
+          {
+            fotoId: this.props.foto.id,
+            like // shorthand property
+          }
+        )
       })
       .catch(erro => {
         console.error(erro.message)
@@ -55,24 +61,51 @@ class FotoAtualizacoes extends Component {
 
 class FotoInfo extends Component {
 
+  constructor(props) {
+    super(props)
+    this.state = {
+      likers: this.props.foto.likers
+    }
+    console.log(this.state)
+    PubSub.subscribe('atualiza-liker', (topico, infoLiker) => {
+      if (infoLiker.fotoId !== this.props.foto.id)
+        return
+
+      const likerExistente = this.state.likers.find(liker => liker.login === infoLiker.like.login)
+
+      if (!likerExistente) {
+        // Adiciona o novo liker na lista de likers
+        const novosLikers = this.state.likers.concat(infoLiker.like)
+        console.log(novosLikers)
+        this.setState({
+          likers: novosLikers
+        })
+      } else {
+        // Remove o novo liker da lista de likers
+        const novosLikers = this.state.likers.filter(liker => liker.login !== infoLiker.like.login)
+        this.setState({ likers: novosLikers })
+      }
+    })
+  }
+
   render() {
     return (
       <div className="foto-info">
         <div className="foto-info-likes">
           {
-            this.props.foto.likers.map((liker, index) => {
+            this.state.likers.map((liker, index) => {
               return (
-                <span>
+                <span key={index}>
                   <Link to={'/timeline/' + liker.login}>
                     {liker.login}
                   </Link>
-                  {index < this.props.foto.likers.length - 1 ? ', ' : ' '}
+                  {index < this.state.likers.length - 1 ? ', ' : ' '}
                 </span>
               )
             })
           }
-          {this.props.foto.likers.length > 0 ?
-            (this.props.foto.likers.length == 1 ? 'curtiu' : 'curtiram') :
+          {this.state.likers.length > 0 ?
+            (this.state.likers.length === 1 ? 'curtiu' : 'curtiram') :
             'Nenhuma likeada'}
         </div>
 
