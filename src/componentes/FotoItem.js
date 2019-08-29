@@ -11,13 +11,48 @@ class FotoAtualizacoes extends Component {
     }
   }
 
+  comentar(e) {
+    e.preventDefault()
+
+    fetch(`https://instalura-api.herokuapp.com/api/fotos/${this.props.foto.id}/comment`,
+      {
+        method: 'POST',
+        headers: { // https://stackoverflow.com/a/45753864
+          'X-AUTH-TOKEN': localStorage.getItem('auth-token'), // pode ser por parâmetro de URL ou de cabeçalho
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          texto: this.comentario.value
+        })
+      }
+    )
+      .then(response => {
+        if (response.ok)
+          return response.json()
+        else
+          throw new Error('Não foi possível comentar a foto (' + response.status + ')')
+      })
+      .then(comentario => {
+        this.comentario.value = ''
+        PubSub.publish('atualiza-comentarios',
+          {
+            fotoId: this.props.foto.id,
+            comentario // shorthand property
+          }
+        )
+      })
+      .catch(erro => {
+        console.error(erro.message)
+      })
+  }
+
   curtir(e) {
     e.preventDefault()
 
     fetch(`https://instalura-api.herokuapp.com/api/fotos/${this.props.foto.id}/like`,
       {
         method: 'POST',
-        headers: { // X-AUTH-TOKEN pode ser por parâmetro de URL ou de cabeçalho
+        headers: {
           'X-AUTH-TOKEN': localStorage.getItem('auth-token')
         }
       }
@@ -35,7 +70,7 @@ class FotoAtualizacoes extends Component {
         PubSub.publish('atualiza-liker',
           {
             fotoId: this.props.foto.id,
-            like // shorthand property
+            like
           }
         )
       })
@@ -47,9 +82,9 @@ class FotoAtualizacoes extends Component {
   render() {
     return (
       <section className="fotoAtualizacoes">
-        <a onClick={this.curtir.bind(this)} className={'fotoAtualizacoes-like' + (this.state.likeada ? '-ativo' : '')}>Likar</a>
-        <form className="fotoAtualizacoes-form">
-          <input type="text" placeholder="Adicione um comentário..." className="fotoAtualizacoes-form-campo" />
+        <div onClick={this.curtir.bind(this)} className={'fotoAtualizacoes-like' + (this.state.likeada ? '-ativo' : '')}>Likar</div>
+        <form className="fotoAtualizacoes-form" onSubmit={this.comentar.bind(this)}>
+          <input type="text" placeholder="Adicione um comentário..." className="fotoAtualizacoes-form-campo" ref={input => this.comentario = input} />
           <input type="submit" value="Comentar!" className="fotoAtualizacoes-form-submit" />
         </form>
 
@@ -64,9 +99,10 @@ class FotoInfo extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      likers: this.props.foto.likers
+      likers: this.props.foto.likers,
+      comentarios: this.props.foto.comentarios
     }
-    console.log(this.state)
+
     PubSub.subscribe('atualiza-liker', (topico, infoLiker) => {
       if (infoLiker.fotoId !== this.props.foto.id)
         return
@@ -76,7 +112,6 @@ class FotoInfo extends Component {
       if (!likerExistente) {
         // Adiciona o novo liker na lista de likers
         const novosLikers = this.state.likers.concat(infoLiker.like)
-        console.log(novosLikers)
         this.setState({
           likers: novosLikers
         })
@@ -86,6 +121,19 @@ class FotoInfo extends Component {
         this.setState({ likers: novosLikers })
       }
     })
+
+    PubSub.subscribe('atualiza-comentarios', (topico, infoComentario) => {
+      if (infoComentario.fotoId !== this.props.foto.id)
+        return
+      
+      // Adiciona o novo comentário na lista de comentários
+      const novosComentarios = this.state.comentarios.concat(infoComentario.comentario)
+      this.setState({
+        comentarios: novosComentarios
+      })
+    })
+
+
   }
 
   render() {
@@ -106,7 +154,7 @@ class FotoInfo extends Component {
           }
           {this.state.likers.length > 0 ?
             (this.state.likers.length === 1 ? 'curtiu' : 'curtiram') :
-            'Nenhuma likeada'}
+            'Nenhuma curtida'}
         </div>
 
         <p className="foto-info-legenda">
@@ -116,7 +164,7 @@ class FotoInfo extends Component {
 
         <ul className="foto-info-comentarios">
           {
-            this.props.foto.comentarios.map(comentario => {
+            this.state.comentarios.map(comentario => {
               return (
                 <li className="comentario" key={comentario.id}>
                   <Link to={`/timeline/${comentario.login}`} className="foto-info-autor">{comentario.login}</Link>
@@ -125,7 +173,7 @@ class FotoInfo extends Component {
               )
             })
           }
-          {this.props.foto.comentarios.length === 0 ? 'Nenhum comentário' : ''}
+          {this.state.comentarios.length === 0 ? 'Nenhum comentário' : ''}
         </ul>
       </div>
     )
