@@ -13,70 +13,14 @@ class FotoAtualizacoes extends Component {
 
   comentar(e) {
     e.preventDefault()
-
-    fetch(`https://instalura-api.herokuapp.com/api/fotos/${this.props.foto.id}/comment`,
-      {
-        method: 'POST',
-        headers: { // https://stackoverflow.com/a/45753864
-          'X-AUTH-TOKEN': localStorage.getItem('auth-token'), // pode ser por parâmetro de URL ou de cabeçalho
-          'Content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          texto: this.comentario.value
-        })
-      }
-    )
-      .then(response => {
-        if (response.ok)
-          return response.json()
-        else
-          throw new Error('Não foi possível comentar a foto (' + response.status + ')')
-      })
-      .then(comentario => {
-        this.comentario.value = ''
-        PubSub.publish('atualiza-comentarios',
-          {
-            fotoId: this.props.foto.id,
-            comentario // shorthand property
-          }
-        )
-      })
-      .catch(erro => {
-        console.error(erro.message)
-      })
+    this.props.comentar(this.props.foto.id, this.comentario.value);
+    this.comentario.value = ''
   }
 
   curtir(e) {
     e.preventDefault()
-
-    fetch(`https://instalura-api.herokuapp.com/api/fotos/${this.props.foto.id}/like`,
-      {
-        method: 'POST',
-        headers: {
-          'X-AUTH-TOKEN': localStorage.getItem('auth-token')
-        }
-      }
-    )
-      .then(response => {
-        if (response.ok)
-          return response.json()
-        else
-          throw new Error('Não foi possível curtir a foto (' + response.status + ')')
-      })
-      .then(like => {
-        this.setState({
-          likeada: !this.state.likeada
-        })
-        PubSub.publish('atualiza-liker',
-          {
-            fotoId: this.props.foto.id,
-            like
-          }
-        )
-      })
-      .catch(erro => {
-        console.error(erro.message)
-      })
+    this.setState({ likeada: !this.state.likeada })
+    this.props.curtir(this.props.foto.id)
   }
 
   render() {
@@ -122,17 +66,16 @@ class FotoInfo extends Component {
       }
     })
 
-    PubSub.subscribe('atualiza-comentarios', (topico, infoComentario) => {
+    PubSub.subscribe('atualizar-comentarios', (topico, infoComentario) => {
       if (infoComentario.fotoId !== this.props.foto.id)
         return
-      
+
       // Adiciona o novo comentário na lista de comentários
       const novosComentarios = this.state.comentarios.concat(infoComentario.comentario)
       this.setState({
         comentarios: novosComentarios
       })
     })
-
 
   }
 
@@ -207,7 +150,7 @@ export default class FotoItem extends Component {
         <FotoHeader foto={this.props.foto} />
         <img alt="foto" className="foto-src" src={this.props.foto.urlFoto} />
         <FotoInfo foto={this.props.foto} />
-        <FotoAtualizacoes foto={this.props.foto} />
+        <FotoAtualizacoes foto={this.props.foto} curtir={this.props.curtir} comentar={this.props.comentar} />
       </div>
     )
   }

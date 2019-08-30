@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import PubSub from 'pubsub-js'
 import FotoItem from './FotoItem'
-import '../css/timeline.css'
 
 export default class Timeline extends Component {
 
@@ -57,10 +56,81 @@ export default class Timeline extends Component {
   }
   // ----------
 
+  curtir(fotoId) {
+    fetch(`https://instalura-api.herokuapp.com/api/fotos/${fotoId}/like`,
+      {
+        method: 'POST',
+        headers: {
+          'X-AUTH-TOKEN': localStorage.getItem('auth-token')
+        }
+      }
+    )
+      .then(response => {
+        if (response.ok)
+          return response.json()
+        else
+          throw new Error('Não foi possível curtir a foto (' + response.status + ')')
+      })
+      .then(like => {
+        PubSub.publish('atualiza-liker',
+          {
+            fotoId: fotoId,
+            like // shorthand property
+          }
+        )
+      })
+      .catch(erro => {
+        console.error(erro.message)
+      })
+  }
+
+  comentar(fotoId, comentarioASerEnviado) {
+    fetch(`https://instalura-api.herokuapp.com/api/fotos/${fotoId}/comment`,
+      {
+        method: 'POST',
+        headers: { // https://stackoverflow.com/a/45753864
+          'X-AUTH-TOKEN': localStorage.getItem('auth-token'), // pode ser por parâmetro de URL ou de cabeçalho
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          texto: comentarioASerEnviado
+        })
+      }
+    )
+      .then(response => {
+        if (response.ok)
+          return response.json()
+        else
+          throw new Error('Não foi possível comentar a foto (' + response.status + ')')
+      })
+      .then(comentarioPostado => {
+        PubSub.publish('atualizar-comentarios',
+          {
+            fotoId: fotoId,
+            comentario: comentarioPostado
+          }
+        )
+      })
+      .catch(erro => {
+        console.error(erro.message)
+      })
+  }
+
   render() {
+    const fotos = this.state.fotos.map(foto => {
+      return (
+        <FotoItem
+          key={foto.id}
+          foto={foto}
+          curtir={this.curtir}
+          comentar={this.comentar}
+        />
+      )
+    })
+
     return (
       <div className="fotos container">
-        {this.state.fotos.map(foto => <FotoItem key={foto.id} foto={foto} />)}
+        {fotos}
       </div>
     )
   }
