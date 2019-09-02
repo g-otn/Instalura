@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import PubSub from 'pubsub-js'
 
 class FotoAtualizacoes extends Component {
 
@@ -19,14 +18,13 @@ class FotoAtualizacoes extends Component {
 
   curtir(e) {
     e.preventDefault()
-    this.setState({ likeada: !this.state.likeada })
     this.props.curtir(this.props.foto.id)
   }
 
   render() {
     return (
       <section className="fotoAtualizacoes">
-        <div onClick={this.curtir.bind(this)} className={'fotoAtualizacoes-like' + (this.state.likeada ? '-ativo' : '')}>Likar</div>
+        <div onClick={this.curtir.bind(this)} className={'fotoAtualizacoes-like' + (this.props.foto.likeada ? '-ativo' : '')}>Likar</div>
         <form className="fotoAtualizacoes-form" onSubmit={this.comentar.bind(this)}>
           <input type="text" placeholder="Adicione um comentário..." className="fotoAtualizacoes-form-campo" ref={input => this.comentario = input} />
           <input type="submit" value="Comentar!" className="fotoAtualizacoes-form-submit" />
@@ -46,37 +44,6 @@ class FotoInfo extends Component {
       likers: this.props.foto.likers,
       comentarios: this.props.foto.comentarios
     }
-
-    PubSub.subscribe('atualiza-liker', (topico, infoLiker) => {
-      if (infoLiker.fotoId !== this.props.foto.id)
-        return
-
-      const likerExistente = this.state.likers.find(liker => liker.login === infoLiker.like.login)
-
-      if (!likerExistente) {
-        // Adiciona o novo liker na lista de likers
-        const novosLikers = this.state.likers.concat(infoLiker.like)
-        this.setState({
-          likers: novosLikers
-        })
-      } else {
-        // Remove o novo liker da lista de likers
-        const novosLikers = this.state.likers.filter(liker => liker.login !== infoLiker.like.login)
-        this.setState({ likers: novosLikers })
-      }
-    })
-
-    PubSub.subscribe('atualizar-comentarios', (topico, infoComentario) => {
-      if (infoComentario.fotoId !== this.props.foto.id)
-        return
-
-      // Adiciona o novo comentário na lista de comentários
-      const novosComentarios = this.state.comentarios.concat(infoComentario.comentario)
-      this.setState({
-        comentarios: novosComentarios
-      })
-    })
-
   }
 
   render() {
@@ -150,7 +117,7 @@ export default class FotoItem extends Component {
         <FotoHeader foto={this.props.foto} />
         <img alt="foto" className="foto-src" src={this.props.foto.urlFoto} />
         <FotoInfo foto={this.props.foto} />
-        <FotoAtualizacoes foto={this.props.foto} curtir={this.props.curtir} comentar={this.props.comentar} />
+        <FotoAtualizacoes {...this.props} />
       </div>
     )
   }

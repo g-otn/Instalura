@@ -16,6 +16,34 @@ export default class Timeline extends Component {
       this.setState({ fotos })
       window.scrollTo(0, 0);
     })
+
+    PubSub.subscribe('atualiza-liker', (topico, infoLiker) => {
+      const indexFoto = this.state.fotos.findIndex(foto => foto.id === infoLiker.fotoId)
+      const novasFotos = this.state.fotos
+
+      const likerExistente = novasFotos[indexFoto].likers.find(liker => liker.login === infoLiker.like.login)
+
+      // Atualiza a propriedade likeada para atualizar o CSS (src da imagem) do botão de like
+      novasFotos[indexFoto].likeada = !novasFotos[indexFoto].likeada
+
+      if (!likerExistente) {
+        // Adiciona o novo liker na lista de likers
+        novasFotos[indexFoto].likers.push(infoLiker.like)
+      } else {
+        // Remove o novo liker da lista de likers
+        novasFotos[indexFoto].likers = novasFotos[indexFoto].likers.filter(liker => liker.login !== infoLiker.like.login)
+      }
+      this.setState({ fotos: novasFotos })
+    })
+
+    PubSub.subscribe('atualizar-comentarios', (topico, infoComentario) => {
+      const indexFoto = this.state.fotos.findIndex(foto => foto.id === infoComentario.fotoId)
+      const novasFotos = this.state.fotos
+
+      novasFotos[indexFoto].comentarios.push(infoComentario.comentario)
+
+      this.setState({ fotos: novasFotos });
+    })
   }
 
   carregarFotos() {
