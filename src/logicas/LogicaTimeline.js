@@ -85,4 +85,10 @@ export default class LogicaTimeline {
       })
   }
 
+  inscrever(callback) {
+    PubSub.subscribe('timeline', (topico, fotos) => {
+      callback(fotos)
+    })
+  }
+
 }

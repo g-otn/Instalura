@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import PubSub from 'pubsub-js'
 import FotoItem from './FotoItem'
 import LogicaTimeline from '../logicas/LogicaTimeline'
 
@@ -12,10 +11,6 @@ export default class Timeline extends Component {
       fotos: []
     }
     this.logicaTimeline = new LogicaTimeline([])
-
-    PubSub.subscribe('timeline', (topico, fotos) => {
-      this.setState({ fotos })
-    })
   }
 
   carregarFotos() {
@@ -29,6 +24,9 @@ export default class Timeline extends Component {
   }
 
   componentDidMount() {
+    this.logicaTimeline.inscrever(fotos => {
+      this.setState({ fotos })
+    })
     this.carregarFotos()
   }
 
