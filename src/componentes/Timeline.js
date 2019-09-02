@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PubSub from 'pubsub-js'
 import FotoItem from './FotoItem'
+import LogicaTimeline from '../logicas/LogicaTimeline'
 
 export default class Timeline extends Component {
 
@@ -10,54 +11,21 @@ export default class Timeline extends Component {
       login: '',
       fotos: []
     }
+    this.logicaTimeline = new LogicaTimeline([])
 
     PubSub.subscribe('timeline', (topico, fotos) => {
       this.setState({ fotos })
-      window.scrollTo(0, 0);
-    })
-
-    PubSub.subscribe('atualizar-liker', (topico, infoLiker) => {
-      const indexFoto = this.state.fotos.findIndex(foto => foto.id === infoLiker.fotoId)
-      const novasFotos = this.state.fotos
-
-      const likerExistente = novasFotos[indexFoto].likers.find(liker => liker.login === infoLiker.like.login)
-
-      // Atualiza a propriedade likeada para atualizar o CSS (src da imagem) do botão de like
-      novasFotos[indexFoto].likeada = !novasFotos[indexFoto].likeada
-
-      if (!likerExistente) {
-        // Adiciona o novo liker na lista de likers
-        novasFotos[indexFoto].likers.push(infoLiker.like)
-      } else {
-        // Remove o novo liker da lista de likers
-        novasFotos[indexFoto].likers = novasFotos[indexFoto].likers.filter(liker => liker.login !== infoLiker.like.login)
-      }
-      this.setState({ fotos: novasFotos })
-    })
-
-    PubSub.subscribe('atualizar-comentarios', (topico, infoComentario) => {
-      const indexFoto = this.state.fotos.findIndex(foto => foto.id === infoComentario.fotoId)
-      const novasFotos = this.state.fotos
-
-      novasFotos[indexFoto].comentarios.push(infoComentario.comentario)
-
-      this.setState({ fotos: novasFotos });
     })
   }
 
   carregarFotos() {
-    let uri = 'https://instalura-api.herokuapp.com/api/'
+    let urlPerfil = 'https://instalura-api.herokuapp.com/api/'
     if (this.state.login) // timeline do usuário logado ou pública?
-      uri += 'public/fotos/' + this.state.login
+      urlPerfil += 'public/fotos/' + this.state.login
     else
-      uri += `fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
+      urlPerfil += `fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
 
-    fetch(uri)
-      .then(response => response.json())
-      .then(fotos => {
-        this.setState({ fotos: fotos.error ? [] : fotos })
-        window.scrollTo(0, 0);
-      })
+    this.logicaTimeline.listar(urlPerfil)
   }
 
   componentDidMount() {
@@ -84,63 +52,11 @@ export default class Timeline extends Component {
   // ----------
 
   curtir(fotoId) {
-    fetch(`https://instalura-api.herokuapp.com/api/fotos/${fotoId}/like`,
-      {
-        method: 'POST',
-        headers: {
-          'X-AUTH-TOKEN': localStorage.getItem('auth-token')
-        }
-      }
-    )
-      .then(response => {
-        if (response.ok)
-          return response.json()
-        else
-          throw new Error('Não foi possível curtir a foto (' + response.status + ')')
-      })
-      .then(like => {
-        PubSub.publish('atualizar-liker',
-          {
-            fotoId: fotoId,
-            like // shorthand property
-          }
-        )
-      })
-      .catch(erro => {
-        console.error(erro.message)
-      })
+    this.logicaTimeline.curtir(fotoId)
   }
 
-  comentar(fotoId, comentarioASerEnviado) {
-    fetch(`https://instalura-api.herokuapp.com/api/fotos/${fotoId}/comment`,
-      {
-        method: 'POST',
-        headers: { // https://stackoverflow.com/a/45753864
-          'X-AUTH-TOKEN': localStorage.getItem('auth-token'), // pode ser por parâmetro de URL ou de cabeçalho
-          'Content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          texto: comentarioASerEnviado
-        })
-      }
-    )
-      .then(response => {
-        if (response.ok)
-          return response.json()
-        else
-          throw new Error('Não foi possível comentar a foto (' + response.status + ')')
-      })
-      .then(comentarioPostado => {
-        PubSub.publish('atualizar-comentarios',
-          {
-            fotoId: fotoId,
-            comentario: comentarioPostado
-          }
-        )
-      })
-      .catch(erro => {
-        console.error(erro.message)
-      })
+  comentar(fotoId, comentario) {
+    this.logicaTimeline.comentar(fotoId, comentario)
   }
 
   render() {
@@ -149,8 +65,8 @@ export default class Timeline extends Component {
         <FotoItem
           key={foto.id}
           foto={foto}
-          curtir={this.curtir}
-          comentar={this.comentar}
+          curtir={this.curtir.bind(this)}
+          comentar={this.comentar.bind(this)}
         />
       )
     })
