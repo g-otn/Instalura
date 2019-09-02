@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import FotoItem from './FotoItem'
-import LogicaTimeline from '../logicas/LogicaTimeline'
 
 export default class Timeline extends Component {
 
@@ -10,7 +9,6 @@ export default class Timeline extends Component {
       login: '',
       fotos: []
     }
-    this.logicaTimeline = new LogicaTimeline([])
   }
 
   carregarFotos() {
@@ -20,11 +18,11 @@ export default class Timeline extends Component {
     else
       urlPerfil += `fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
 
-    this.logicaTimeline.listar(urlPerfil)
+    this.props.store.listar(urlPerfil)
   }
 
   componentDidMount() {
-    this.logicaTimeline.inscrever(fotos => {
+    this.props.store.inscrever(fotos => {
       this.setState({ fotos })
     })
     this.carregarFotos()
@@ -50,11 +48,11 @@ export default class Timeline extends Component {
   // ----------
 
   curtir(fotoId) {
-    this.logicaTimeline.curtir(fotoId)
+    this.props.store.curtir(fotoId)
   }
 
   comentar(fotoId, comentario) {
-    this.logicaTimeline.comentar(fotoId, comentario)
+    this.props.store.comentar(fotoId, comentario)
   }
 
   render() {
