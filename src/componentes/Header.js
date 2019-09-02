@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PubSub from 'pubsub-js'
+import { Link } from 'react-router-dom'
 
 export default class Header extends Component {
 
@@ -36,11 +37,8 @@ export default class Header extends Component {
         <nav>
           <ul className="header-nav">
             <li className="header-nav-item">
-              <a href="#">
-                ♡
-                  {/*                 ♥ */}
-                {/* Quem deu like nas minhas fotos */}
-              </a>
+              <Link to="/timeline">♡</Link>
+              <Link to="/logout">×</Link>
             </li>
           </ul>
         </nav>
