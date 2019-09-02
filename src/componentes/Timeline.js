@@ -12,12 +12,11 @@ export default class Timeline extends Component {
     }
 
     PubSub.subscribe('timeline', (topico, fotos) => {
-      console.log(fotos)
       this.setState({ fotos })
       window.scrollTo(0, 0);
     })
 
-    PubSub.subscribe('atualiza-liker', (topico, infoLiker) => {
+    PubSub.subscribe('atualizar-liker', (topico, infoLiker) => {
       const indexFoto = this.state.fotos.findIndex(foto => foto.id === infoLiker.fotoId)
       const novasFotos = this.state.fotos
 
@@ -100,7 +99,7 @@ export default class Timeline extends Component {
           throw new Error('Não foi possível curtir a foto (' + response.status + ')')
       })
       .then(like => {
-        PubSub.publish('atualiza-liker',
+        PubSub.publish('atualizar-liker',
           {
             fotoId: fotoId,
             like // shorthand property

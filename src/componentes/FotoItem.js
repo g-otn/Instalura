@@ -3,13 +3,6 @@ import { Link } from 'react-router-dom'
 
 class FotoAtualizacoes extends Component {
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      likeada: this.props.foto.likeada
-    }
-  }
-
   comentar(e) {
     e.preventDefault()
     this.props.comentar(this.props.foto.id, this.comentario.value);
@@ -37,33 +30,25 @@ class FotoAtualizacoes extends Component {
 }
 
 class FotoInfo extends Component {
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      likers: this.props.foto.likers,
-      comentarios: this.props.foto.comentarios
-    }
-  }
-
+  
   render() {
     return (
       <div className="foto-info">
         <div className="foto-info-likes">
           {
-            this.state.likers.map((liker, index) => {
+            this.props.foto.likers.map((liker, index) => {
               return (
                 <span key={index}>
                   <Link to={'/timeline/' + liker.login}>
                     {liker.login}
                   </Link>
-                  {index < this.state.likers.length - 1 ? ', ' : ' '}
+                  {index < this.props.foto.likers.length - 1 ? ', ' : ' '}
                 </span>
               )
             })
           }
-          {this.state.likers.length > 0 ?
-            (this.state.likers.length === 1 ? 'curtiu' : 'curtiram') :
+          {this.props.foto.likers.length > 0 ?
+            (this.props.foto.likers.length === 1 ? 'curtiu' : 'curtiram') :
             'Nenhuma curtida'}
         </div>
 
@@ -74,7 +59,7 @@ class FotoInfo extends Component {
 
         <ul className="foto-info-comentarios">
           {
-            this.state.comentarios.map(comentario => {
+            this.props.foto.comentarios.map(comentario => {
               return (
                 <li className="comentario" key={comentario.id}>
                   <Link to={`/timeline/${comentario.login}`} className="foto-info-autor">{comentario.login}</Link>
@@ -83,7 +68,7 @@ class FotoInfo extends Component {
               )
             })
           }
-          {this.state.comentarios.length === 0 ? 'Nenhum comentário' : ''}
+          {this.props.foto.comentarios.length === 0 ? 'Nenhum comentário' : ''}
         </ul>
       </div>
     )
