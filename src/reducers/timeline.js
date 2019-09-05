@@ -8,7 +8,7 @@ export function timeline(state = [], action) {
     const comentarioPostado = action.comentarioPostado
     const fotoAchada = state.find(foto => foto.id === fotoId) 
     
-    // push direto pois fotoAchada é uma REFERÊNCIA constante
+    // push direto pois fotoAchada é uma REFERÊNCIA constante a state
     fotoAchada.comentarios.push(comentarioPostado) 
 
     return state
