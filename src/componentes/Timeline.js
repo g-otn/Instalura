@@ -22,7 +22,6 @@ export default class Timeline extends Component {
 
 
     this.props.store.dispatch(TimelineAPI.listar(urlPerfil))
-    TimelineAPI.listar(urlPerfil, this.props.store)
   }
 
   componentDidMount() {
@@ -56,7 +55,8 @@ export default class Timeline extends Component {
   }
 
   comentar(fotoId, comentario) {
-    this.props.store.comentar(fotoId, comentario)
+    console.log(fotoId, comentario)
+    this.props.store.dispatch(TimelineAPI.comentar(fotoId, comentario))
   }
 
   render() {

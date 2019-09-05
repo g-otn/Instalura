@@ -3,5 +3,16 @@ export function timeline(state = [], action) {
     return action.fotos
   }
 
+  if (action.type === 'COMENTARIO') {
+    const fotoId = action.fotoId
+    const comentarioPostado = action.comentarioPostado
+    const fotoAchada = state.find(foto => foto.id === fotoId) 
+    
+    // push direto pois fotoAchada é uma REFERÊNCIA constante
+    fotoAchada.comentarios.push(comentarioPostado) 
+
+    return state
+  }
+
   return state
 }

@@ -16,36 +16,33 @@ export default class TimelineAPI {
     }
   }
 
-  comentar(fotoId, comentarioASerEnviado) {
-    fetch(`https://instalura-api.herokuapp.com/api/fotos/${fotoId}/comment`,
-      {
-        method: 'POST',
-        headers: { // https://stackoverflow.com/a/45753864
-          'X-AUTH-TOKEN': localStorage.getItem('auth-token'), // pode ser por parâmetro de URL ou de cabeçalho
-          'Content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          texto: comentarioASerEnviado
+  static comentar(fotoId, comentarioASerEnviado) {
+    return dispatch => {
+      fetch(`https://instalura-api.herokuapp.com/api/fotos/${fotoId}/comment`,
+        {
+          method: 'POST',
+          headers: { // https://stackoverflow.com/a/45753864
+            'X-AUTH-TOKEN': localStorage.getItem('auth-token'), // pode ser por parâmetro de URL ou de cabeçalho
+            'Content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            texto: comentarioASerEnviado
+          })
+        }
+      )
+        .then(response => {
+          if (response.ok)
+            return response.json()
+          else
+            throw new Error('Não foi possível comentar a foto (' + response.status + ')')
         })
-      }
-    )
-      .then(response => {
-        if (response.ok)
-          return response.json()
-        else
-          throw new Error('Não foi possível comentar a foto (' + response.status + ')')
-      })
-      .then(comentarioPostado => {
-
-        const indexFoto = this.fotos.findIndex(foto => foto.id === fotoId)
-  
-        this.fotos[indexFoto].comentarios.push(comentarioPostado)
-  
-        PubSub.publish('timeline', this.fotos)
-      })
-      .catch(erro => {
-        console.error(erro.message)
-      })
+        .then(comentarioPostado => {
+          dispatch({type: 'COMENTARIO', fotoId, comentarioPostado})
+        })
+        .catch(erro => {
+          console.error(erro.message)
+        })
+    }
   }
 
   curtir(fotoId) {
