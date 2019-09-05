@@ -13,6 +13,7 @@ export default class Timeline extends Component {
 
   carregarFotos() {
     let urlPerfil = 'https://instalura-api.herokuapp.com/api/'
+    
     if (this.state.login) // timeline do usuário logado ou pública?
       urlPerfil += 'public/fotos/' + this.state.login
     else
