@@ -6,12 +6,14 @@ export default class TimelineAPI {
     this.fotos = fotos
   }
 
-  static listar(urlPerfil, store) {
-    fetch(urlPerfil)
-      .then(response => response.json())
-      .then(fotos => {
-        store.dispatch({type: 'LISTAGEM', fotos})
-      })
+  static listar(urlPerfil) {
+    return dispatch => {
+      fetch(urlPerfil)
+        .then(response => response.json())
+        .then(fotos => {
+          dispatch({type: 'LISTAGEM', fotos})
+        })
+    }
   }
 
   comentar(fotoId, comentarioASerEnviado) {

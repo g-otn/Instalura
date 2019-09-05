@@ -20,12 +20,13 @@ export default class Timeline extends Component {
     else
       urlPerfil += `fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
 
+
+    this.props.store.dispatch(TimelineAPI.listar(urlPerfil))
     TimelineAPI.listar(urlPerfil, this.props.store)
   }
 
   componentDidMount() {
     this.props.store.subscribe(() => {
-      console.log(this.props.store.getState())
       this.setState({ fotos: this.props.store.getState() })
     })
     this.carregarFotos()
