@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import FotoItem from './FotoItem'
+import TimelineAPI from '../logicas/TimelineAPI'
 
 export default class Timeline extends Component {
 
@@ -19,11 +20,7 @@ export default class Timeline extends Component {
     else
       urlPerfil += `fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
 
-    const listaFixa = [{ "urlPerfil": "https://s3.amazonaws.com/caelum-online-public/react-native-parte-2/images/adittional-resources/profile-photo-alberto.jpg", "loginUsuario": "alots", "horario": "05/09/2019 11:14", "urlFoto": "https://s3.amazonaws.com/caelum-online-public/react-native-parte-2/images/adittional-resources/photo-1.jpg", "id": 1, "likeada": false, "likers": [{ "login": "vitor" }, { "login": "alots" }], "comentarios": [{ "login": "alots", "texto": "bunito", "id": 2 }], "comentario": "Legenda da foto" }, { "urlPerfil": "https://s3.amazonaws.com/caelum-online-public/react-native-parte-2/images/adittional-resources/profile-photo-alberto.jpg", "loginUsuario": "alots", "horario": "05/09/2019 11:14", "urlFoto": "https://s3.amazonaws.com/caelum-online-public/react-native-parte-2/images/adittional-resources/photo-2.jpg", "id": 2, "likeada": false, "likers": [{ "login": "vitor" }], "comentarios": [{ "login": "vitor", "texto": "wadsad", "id": 3 }], "comentario": "Legenda da foto" }]
-
-    this.props.store.dispatch({ type: 'LISTAGEM', fotos: listaFixa })
-
-    //this.props.store.listar(urlPerfil)
+    TimelineAPI.listar(urlPerfil, this.props.store)
   }
 
   componentDidMount() {
