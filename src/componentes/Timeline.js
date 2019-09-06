@@ -51,11 +51,10 @@ export default class Timeline extends Component {
   // ----------
 
   curtir(fotoId) {
-    this.props.store.curtir(fotoId)
+    this.props.store.dispatch(TimelineAPI.curtir(fotoId))
   }
 
   comentar(fotoId, comentario) {
-    console.log(fotoId, comentario)
     this.props.store.dispatch(TimelineAPI.comentar(fotoId, comentario))
   }
 
